@@ -19,11 +19,24 @@ public:
     ~MainWindow();
 
 private:
+    QString current_filename;
+
     void createUi();
-    void openFile();
+    bool newFile();
+    bool openFile();
+    bool saveFile();
+    bool saveAs();
+    bool saveAsFile(QString&);
+    bool getSaveFileName(QString*);
+
 //    Ui::MainWindow *ui;
     QTextEdit* textEdit;
+
+    QAction* ac_newfile;
     QAction* ac_openfile;
+    QAction* ac_savefile;
+    QAction* ac_save_as;
+
     QMenuBar* menuBar;
     QMenu* fileMenu;
     QMenu* editMenu;
