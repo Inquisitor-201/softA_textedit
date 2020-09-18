@@ -49,15 +49,22 @@ void MainWindow::createUi()
 
 bool MainWindow::newFile()
 {
+    if (!querySave())
+        return false;
     current_filename = "";
     textEdit->clear();
     textEdit->document()->setModified(false);
     return true;
 }
 
-bool MainWindow::openFile()   //打开文件
+bool MainWindow::openFile()          //打开文件
 {
+    if (!querySave())
+        return false;
     QString filename = QFileDialog::getOpenFileName(NULL, "打开文件", "./", "All files (*.*);; text (*.txt)");
+    if (filename.isEmpty())
+        return false;                            //选择要打开的文件，将其文件名存放在filename中
+
     QFile file(filename);
     if (!file.open(QIODevice::ReadWrite)){
         qWarning("无法打开文件！");
@@ -68,7 +75,7 @@ bool MainWindow::openFile()   //打开文件
 
     textEdit->setText(content);
     textEdit->document()->setModified(false);
-    current_filename = filename;
+    current_filename = filename;                 //将文件内容输出到文本框中
     return true;
 }
 
@@ -98,12 +105,12 @@ bool MainWindow::saveAsFile(QString& filename)
 
 bool MainWindow::getSaveFileName(QString* str)
 {
-    QFileDialog fdialog(this, "Save as..");
+    QFileDialog fdialog(this, "另存为..");
     fdialog.setFileMode(QFileDialog::AnyFile);
     fdialog.setNameFilter("text(*.txt)");
     fdialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fdialog.exec() == QFileDialog::Reject) {
-        qWarning("Failed to save the file.");
+        qWarning("保存失败.");
         return false;
     }
     if (fdialog.selectedFiles().empty())
@@ -114,7 +121,7 @@ bool MainWindow::getSaveFileName(QString* str)
 
 bool MainWindow::saveFile()
 {
-    if (!textEdit->document()->isModified() || textEdit->document()->isEmpty())
+    if (!textEdit->document()->isModified())
         return true;
     if (current_filename.isEmpty())
     {
@@ -123,6 +130,30 @@ bool MainWindow::saveFile()
     }
     bool ret = saveAsFile(current_filename);
     return ret;
+}
+
+bool MainWindow::querySave()
+{
+    if (!textEdit->document()->isModified())
+        return true;
+
+    QMessageBox msgbox(this);
+    msgbox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgbox.setInformativeText("文件已修改，是否保存？");
+    msgbox.setDefaultButton(QMessageBox::Save);
+    int ret = msgbox.exec();
+
+    switch (ret)
+    {
+        case QMessageBox::Save:
+            saveFile();
+            break;
+        case QMessageBox::Discard:
+            break;
+        case QMessageBox::Cancel:
+            return false;
+    }
+    return true;
 }
 
 MainWindow::~MainWindow()
