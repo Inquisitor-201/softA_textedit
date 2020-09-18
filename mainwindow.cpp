@@ -24,22 +24,26 @@ void MainWindow::createUi()
     ac_openfile = new QAction("打开(&O)");
     ac_savefile = new QAction("保存(&S)");
     ac_save_as = new QAction("另存为(&A)");
+    ac_quit = new QAction("关闭(&Q)");
 
     connect(ac_newfile, &QAction::triggered, this, &MainWindow::newFile);
     connect(ac_openfile, &QAction::triggered, this, &MainWindow::openFile);
     connect(ac_savefile, &QAction::triggered, this, &MainWindow::saveFile);
     connect(ac_save_as, &QAction::triggered, this, &MainWindow::saveAs);
+    connect(ac_quit, &QAction::triggered, this, &MainWindow::QuitProgram);
 
     ac_newfile->setShortcut(QKeySequence::New);
     ac_openfile->setShortcut(QKeySequence::Open);
     ac_savefile->setShortcut(QKeySequence::Save);
     ac_save_as->setShortcut(QKeySequence::SaveAs);
+    ac_quit->setShortcut(QKeySequence::Quit);
 
     fileMenu->setTitle("文件");
     fileMenu->addAction(ac_newfile);
     fileMenu->addAction(ac_openfile);
     fileMenu->addAction(ac_savefile);
     fileMenu->addAction(ac_save_as);
+    fileMenu->addAction(ac_quit);
 
     editMenu = new QMenu(this);
     editMenu->setTitle("编辑");             //新建编辑菜单
@@ -132,6 +136,13 @@ bool MainWindow::saveFile()
     return ret;
 }
 
+bool MainWindow::QuitProgram()
+{
+    if (!querySave())
+        return false;
+    return close();
+}
+
 bool MainWindow::querySave()
 {
     if (!textEdit->document()->isModified())
@@ -139,7 +150,8 @@ bool MainWindow::querySave()
 
     QMessageBox msgbox(this);
     msgbox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    msgbox.setInformativeText("文件已修改，是否保存？");
+    msgbox.setText("文件 " + (current_filename.isEmpty() ? "(Untitled)" : current_filename) + " 已修改。");
+    msgbox.setInformativeText("是否保存？");
     msgbox.setDefaultButton(QMessageBox::Save);
     int ret = msgbox.exec();
 

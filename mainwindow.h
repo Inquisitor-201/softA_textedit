@@ -26,6 +26,7 @@ private:
     bool openFile();
     bool saveFile();                   //保存文件（若已存在文件名，则直接保存，否则调用getSaveFileName)
     bool saveAs();                     //另存为
+    bool QuitProgram();                //关闭程序
 
     bool saveAsFile(QString&);         //给定一个QString filename，将文本框的内容保存到filename的文件中
     bool getSaveFileName(QString*);    //展示一个QFileDialog, 将需要保存的文件名存放到给定地址中
@@ -38,6 +39,7 @@ private:
     QAction* ac_openfile;
     QAction* ac_savefile;
     QAction* ac_save_as;
+    QAction* ac_quit;
 
     QMenuBar* menuBar;
     QMenu* fileMenu;
