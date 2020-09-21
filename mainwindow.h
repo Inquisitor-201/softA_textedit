@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QTextEdit>
+#include "highlighter.h"
 
 //QT_BEGIN_NAMESPACE
 //namespace Ui { class MainWindow; }
@@ -22,6 +23,8 @@ private:
     QString current_filename;
 
     void createUi();
+    void setupTextEdit();
+
     bool newFile();
     bool openFile();
     bool saveFile();                   //保存文件（若已存在文件名，则直接保存，否则调用getSaveFileName)
@@ -44,5 +47,7 @@ private:
     QMenuBar* menuBar;
     QMenu* fileMenu;
     QMenu* editMenu;
+
+
 };
 #endif // MAINWINDOW_H

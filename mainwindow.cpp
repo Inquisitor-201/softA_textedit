@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     createUi();
+    setupTextEdit();
 }
 
 void MainWindow::createUi()
@@ -49,6 +50,15 @@ void MainWindow::createUi()
     editMenu->setTitle("编辑");             //新建编辑菜单
     menuBar->addMenu(fileMenu);
     menuBar->addMenu(editMenu);
+}
+
+void MainWindow::setupTextEdit()
+{
+    QFont globalFont;
+    globalFont.setFamily("Consolas");
+    globalFont.setPixelSize(17);
+    textEdit->setFont(globalFont);
+    new Highlighter(textEdit->document());
 }
 
 bool MainWindow::newFile()
