@@ -1,6 +1,7 @@
 ﻿#include "highlighter.h"
 #include <QRegularExpression>
 #include <QDebug>
+
 Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent)
 {
     const QString keyword_patterns[] = {
@@ -88,30 +89,65 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent)
     }                                                                          //keyword样式
 
     QTextCharFormat numberFormat;
-    numberFormat.setForeground(QBrush(QColor(151, 102, 214)));
+    numberFormat.setForeground(QBrush(QColor(128, 0, 128)));
     rules.push_back((Rule){QRegularExpression("\\b[0-9]+\\b"), numberFormat}); //number样式
+
+    QTextCharFormat quotationFormat;
+    quotationFormat.setForeground(QBrush(QColor(0, 0, 255)));
+    rules.push_back((Rule){QRegularExpression("\".*\""), quotationFormat});
+
+    QTextCharFormat operatorFormat;
+    operatorFormat.setForeground(QBrush(QColor(255, 0, 0)));
+    rules.push_back((Rule){QRegularExpression("[;()\\{\\}\\[\\]\\~\\!\\@\\#\\$\\%\\^\\&\\-\\=\\+\\*\\?<>:]"), operatorFormat});
+
+    QTextCharFormat precomplingInstructionFormat;
+    precomplingInstructionFormat.setForeground(QBrush(QColor(0, 128, 0)));
+    rules.push_back((Rule){QRegularExpression("^#.*$"), precomplingInstructionFormat});  //预编译指令样式
 
     QTextCharFormat singleLineCommentFormat;
     singleLineCommentFormat.setFontItalic(true);
     singleLineCommentFormat.setForeground(QBrush(QColor(0, 120, 222)));
     rules.push_back((Rule){QRegularExpression("//.*$"), singleLineCommentFormat});  //单行注释样式
 
-    QTextCharFormat precomplingInstructionFormat;
-    precomplingInstructionFormat.setForeground(QBrush(QColor(0, 128, 0)));
-    rules.push_back((Rule){QRegularExpression("^#.*$"), precomplingInstructionFormat});  //预编译指令样式
+    multiLineCommentFormat.setFontItalic(true);
+    multiLineCommentFormat.setForeground(QBrush(QColor(0, 120, 222)));
 }
 
 void Highlighter::highlightBlock(const QString &text)
 {
     for (const Rule& rule : qAsConst(rules))
     {
-        //qDebug() << "rule: " << "OK";
         QRegularExpressionMatchIterator i = rule.re.globalMatch(text);
         while (i.hasNext())
         {
             QRegularExpressionMatch match = i.next();
             setFormat(match.capturedStart(), match.capturedLength(), rule.format);
         }
+    }
+
+    /**下面匹配多行注释**/
+
+    QRegularExpression commentStart("/\\*");
+    QRegularExpression commentEnd("\\*/");
+
+    setCurrentBlockState(0);
+    int startIndex = 0, endIndex = 0, commentLength = 0;
+
+    if (previousBlockState() != 1) {
+        startIndex = commentStart.match(text).capturedStart();
+        //qDebug() << "startIndex=" << startIndex;
+    }  //上一行的末尾已经在多行注释中了，则接下来要匹配*/，若上一行的末尾不在多行注释中，则先匹配/*
+
+    while (startIndex >= 0) { //只要还能找到/*的匹配，或者上一行已经在多行注释中
+        endIndex = commentEnd.match(text, startIndex).capturedStart();
+        if (endIndex == -1) { //说明本行找不到*/的匹配
+            setCurrentBlockState(1);
+            commentLength = text.length() - startIndex;
+        } else {              //找到*/的匹配了
+            commentLength = endIndex - startIndex + 2;
+        }
+        setFormat(startIndex, commentLength, multiLineCommentFormat);
+        startIndex = commentStart.match(text, startIndex + commentLength).capturedStart();
     }
 }
 

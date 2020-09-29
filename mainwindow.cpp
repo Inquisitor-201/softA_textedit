@@ -9,16 +9,16 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     createUi();
+    setupDialogs();
     setupTextEdit();
 }
 
 void MainWindow::createUi()
 {
-    textEdit = new QTextEdit(this);
-    setCentralWidget(textEdit);
     menuBar = new QMenuBar(this);
     setMenuBar(menuBar);                   //新建菜单栏
 
+//!-----[filemenu]-----
     fileMenu = new QMenu(this);            //新建文件菜单
 
     ac_newfile = new QAction("新建(&N)");
@@ -44,21 +44,36 @@ void MainWindow::createUi()
     fileMenu->addAction(ac_openfile);
     fileMenu->addAction(ac_savefile);
     fileMenu->addAction(ac_save_as);
+    fileMenu->addSeparator();
     fileMenu->addAction(ac_quit);
 
+    menuBar->addMenu(fileMenu);
+//!-----[filemenu]-----
+
+//!-----[editmenu]-----
     editMenu = new QMenu(this);
     editMenu->setTitle("编辑");             //新建编辑菜单
-    menuBar->addMenu(fileMenu);
+
+    ac_replace = new QAction("查找(&F)...");
+
+    connect(ac_replace, &QAction::triggered, this, &MainWindow::Replace);
+
+    editMenu->addSeparator();
+    editMenu->addAction(ac_replace);
+
     menuBar->addMenu(editMenu);
+//!-----[editmenu]-----
+}
+
+void MainWindow::setupDialogs()
+{
+    replace_dialog = new replaceDialog();
 }
 
 void MainWindow::setupTextEdit()
 {
-    QFont globalFont;
-    globalFont.setFamily("Consolas");
-    globalFont.setPixelSize(17);
-    textEdit->setFont(globalFont);
-    new Highlighter(textEdit->document());
+    textEdit = new customEdit(this);
+    setCentralWidget(textEdit);
 }
 
 bool MainWindow::newFile()
@@ -87,7 +102,7 @@ bool MainWindow::openFile()          //打开文件
     QTextStream in(&file);
     QString content = in.readAll();
 
-    textEdit->setText(content);
+    textEdit->setPlainText(content);
     textEdit->document()->setModified(false);
     current_filename = filename;                 //将文件内容输出到文本框中
     return true;
@@ -176,6 +191,11 @@ bool MainWindow::querySave()
             return false;
     }
     return true;
+}
+
+void MainWindow::Replace()
+{
+    replace_dialog->show();
 }
 
 MainWindow::~MainWindow()

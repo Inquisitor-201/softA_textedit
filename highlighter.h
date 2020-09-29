@@ -11,14 +11,17 @@ class Highlighter : public QSyntaxHighlighter
 public:
     Highlighter(QTextDocument *parent = 0);
     ~Highlighter();
+
 protected:
     void highlightBlock(const QString &text) override; //重载高亮语句
+
 private:
     struct Rule{
         QRegularExpression re;
         QTextCharFormat format;
     };
     std::vector<Rule> rules;
+    QTextCharFormat multiLineCommentFormat;
 };
 
 #endif // HIGHLITER_H
