@@ -92,13 +92,13 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent)
     numberFormat.setForeground(QBrush(QColor(128, 0, 128)));
     rules.push_back((Rule){QRegularExpression("\\b[0-9]+\\b"), numberFormat}); //number样式
 
+    QTextCharFormat operatorFormat;
+    operatorFormat.setForeground(QBrush(QColor(255, 0, 0)));
+    rules.push_back((Rule){QRegularExpression("[,;()\\{\\}\\[\\]\\~\\!\\@\\#\\$\\%\\^\\&\\-\\=\\+\\*\\?<>:]"), operatorFormat});
+
     QTextCharFormat quotationFormat;
     quotationFormat.setForeground(QBrush(QColor(0, 0, 255)));
     rules.push_back((Rule){QRegularExpression("\".*\""), quotationFormat});
-
-    QTextCharFormat operatorFormat;
-    operatorFormat.setForeground(QBrush(QColor(255, 0, 0)));
-    rules.push_back((Rule){QRegularExpression("[;()\\{\\}\\[\\]\\~\\!\\@\\#\\$\\%\\^\\&\\-\\=\\+\\*\\?<>:]"), operatorFormat});
 
     QTextCharFormat precomplingInstructionFormat;
     precomplingInstructionFormat.setForeground(QBrush(QColor(0, 128, 0)));

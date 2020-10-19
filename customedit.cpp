@@ -1,4 +1,5 @@
 ﻿#include "customedit.h"
+#include "replacedialog.h"
 #include <QDebug>
 #include <QListWidget>
 #include <QStringListModel>
@@ -16,13 +17,20 @@ customEdit::customEdit(QWidget* parent): QPlainTextEdit(parent)
     connect(this, &QPlainTextEdit::cursorPositionChanged,
             this, &customEdit::highlightCurrentLine);
 
-    customCompleter = new Completer();
+    customCompleter = new Completer(this);
 
     wordList = new QListWidget(this);
-    wordList->setVisible(false);
+    wordList->setVisible(false);        //代码自动补全的单词表
+
+    QPalette p = this->palette();       //分别得到有焦点时高亮的背景色和文本颜色
+    QColor color1 = p.color(QPalette::Active, QPalette::Highlight);
+    QColor color2 = p.color(QPalette::Active, QPalette::HighlightedText); //设置失去焦点时高亮的背景色和文本颜色
+    p.setColor(QPalette::Inactive, QPalette::Highlight, color1);
+    p.setColor(QPalette::Inactive, QPalette::HighlightedText, color2);
+    this->setPalette(p);                //把该copy重新设置为QTextEdit的QPalette
 }
 
-void customEdit::keyPressEvent(QKeyEvent *e)
+void customEdit::keyPressEvent(QKeyEvent *e) // 代码补全
 {
     QPlainTextEdit::keyPressEvent(e);
     QTextCursor tc = textCursor();

@@ -1,4 +1,5 @@
-QT       += core gui
+QT       += core gui \
+    quick
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,22 +17,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    binaryeditor.cpp \
     completer.cpp \
     customedit.cpp \
+    filepropertydialog.cpp \
     highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
     replacedialog.cpp
 
 HEADERS += \
+    binaryeditor.h \
     completer.h \
     customedit.h \
+    filepropertydialog.h \
     highlighter.h \
     mainwindow.h \
     replacedialog.h
 
 FORMS += \
-    mainwindow.ui \
+    filepropertydialog.ui \
     replacedialog.ui
 
 # Default rules for deployment.

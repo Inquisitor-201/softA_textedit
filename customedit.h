@@ -6,6 +6,8 @@
 #include "highlighter.h"
 #include "completer.h"
 
+class replaceDialog;
+
 class customEdit : public QPlainTextEdit
 {
     Q_OBJECT
@@ -23,6 +25,7 @@ private:
     Highlighter* customHighlighter;
     QListWidget* wordList;
     Completer* customCompleter;
+    replaceDialog* replace_dialog;
     QFont globalFont;
 };
 

@@ -1,5 +1,34 @@
 <RCC>
-    <qresource prefix="/resources">
-        <file alias="wordlist">resources/wordlist.txt</file>
+    <qresource prefix="/">
+        <file>resources/wordlist/wordlist.txt</file>
+        <file>resources/icons/checkbox.png</file>
+        <file>resources/icons/checkbox-checked.png</file>
+        <file>resources/icons/editcopy.png</file>
+        <file>resources/icons/editcut.png</file>
+        <file>resources/icons/editpaste.png</file>
+        <file>resources/icons/editredo.png</file>
+        <file>resources/icons/editundo.png</file>
+        <file>resources/icons/exportpdf.png</file>
+        <file>resources/icons/filenew.png</file>
+        <file>resources/icons/fileopen.png</file>
+        <file>resources/icons/fileprint.png</file>
+        <file>resources/icons/filesave.png</file>
+        <file>resources/icons/format-indent-less.png</file>
+        <file>resources/icons/format-indent-more.png</file>
+        <file>resources/icons/textbold.png</file>
+        <file>resources/icons/textcenter.png</file>
+        <file>resources/icons/textitalic.png</file>
+        <file>resources/icons/textjustify.png</file>
+        <file>resources/icons/textleft.png</file>
+        <file>resources/icons/textright.png</file>
+        <file>resources/icons/textunder.png</file>
+        <file>resources/icons/zoomin.png</file>
+        <file>resources/icons/zoomout.png</file>
+        <file>resources/icons/fileclose.png</file>
+        <file>resources/icons/editfind.png</file>
+        <file>resources/icons/openproject.png</file>
+        <file>resources/styles/scrollbar.qss</file>
+        <file>resources/icons/window.jpg</file>
+        <file>resources/icons/editreplace.png</file>
     </qresource>
 </RCC>

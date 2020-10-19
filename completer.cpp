@@ -9,7 +9,7 @@ Completer::Completer(QObject *parent) : QObject(parent)
 }
 
 void Completer::initTrie() {
-    QFile file(":/resources/wordlist");
+    QFile file(":/resources/wordlist/wordlist.txt");
     int ret = file.open(QIODevice::ReadOnly);
     Q_ASSERT(ret);
 
