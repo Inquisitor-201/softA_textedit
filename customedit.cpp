@@ -1,15 +1,19 @@
 ﻿#include "customedit.h"
 #include "replacedialog.h"
+#include "mainwindow.h"
 #include <QDebug>
 #include <QListWidget>
 #include <QStringListModel>
 #include <QHBoxLayout>
+#include <QApplication>
+
+QFont* globalFont = new QFont();
 
 customEdit::customEdit(QWidget* parent): QPlainTextEdit(parent)
 {
-    globalFont.setFamily("Consolas");
-    globalFont.setPixelSize(18);
-    setFont(globalFont);
+    globalFont->setFamily("Consolas");
+    globalFont->setPixelSize(18);
+    setFont(*globalFont);
 
     setTabStopDistance(40);
 
@@ -22,12 +26,22 @@ customEdit::customEdit(QWidget* parent): QPlainTextEdit(parent)
     wordList = new QListWidget(this);
     wordList->setVisible(false);        //代码自动补全的单词表
 
-    QPalette p = this->palette();       //分别得到有焦点时高亮的背景色和文本颜色
+    QPalette p = palette();       //分别得到有焦点时高亮的背景色和文本颜色
     QColor color1 = p.color(QPalette::Active, QPalette::Highlight);
     QColor color2 = p.color(QPalette::Active, QPalette::HighlightedText); //设置失去焦点时高亮的背景色和文本颜色
     p.setColor(QPalette::Inactive, QPalette::Highlight, color1);
     p.setColor(QPalette::Inactive, QPalette::HighlightedText, color2);
-    this->setPalette(p);                //把该copy重新设置为QTextEdit的QPalette
+    setPalette(p);                //把该copy重新设置为QTextEdit的QPalette
+}
+
+void customEdit::setMainWindow(MainWindow* mw)
+{
+    main_window = mw;
+}
+
+MainWindow* customEdit::getMainWindow()
+{
+    return main_window;
 }
 
 void customEdit::keyPressEvent(QKeyEvent *e) // 代码补全
@@ -62,7 +76,7 @@ void customEdit::keyPressEvent(QKeyEvent *e) // 代码补全
 
     wordList->clear();
     wordList->setVisible(!stringList.isEmpty());
-    wordList->setGeometry(X, Y + globalFont.pixelSize() + 4, 200, std::min(20 * stringList.length(), 160) + 2);
+    wordList->setGeometry(X, Y + globalFont->pixelSize() + 4, 200, std::min(20 * stringList.length(), 160) + 2);
     wordList->addItems(stringList);
 }
 
@@ -83,6 +97,21 @@ void customEdit::highlightCurrentLine()
     }
 
     setExtraSelections(extraSelections);
+}
+
+void customEdit::wheelEvent(QWheelEvent *e)    // 滚轮事件
+{
+    //qDebug() << "wheel";
+    if (QApplication::keyboardModifiers () == Qt::ControlModifier)
+    {
+        if (e->delta() > 0){
+            main_window->zoomin();
+        } else {
+            main_window->zoomout();
+        }
+    } else {
+        QPlainTextEdit::wheelEvent(e);
+    }
 }
 
 customEdit::~customEdit()

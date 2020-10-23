@@ -30,5 +30,7 @@
         <file>resources/styles/scrollbar.qss</file>
         <file>resources/icons/window.jpg</file>
         <file>resources/icons/editreplace.png</file>
+        <file>resources/icons/binedit.png</file>
+        <file>resources/icons/settings.png</file>
     </qresource>
 </RCC>

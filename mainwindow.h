@@ -15,6 +15,7 @@
 #include "customedit.h"
 #include "filepropertydialog.h"
 #include "binaryeditor.h"
+#include "settingsdialog.h"
 
 class replaceDialog;
 //QT_BEGIN_NAMESPACE
@@ -28,6 +29,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void zoomin();
+    void zoomout();
 
 public slots:
     void findNext();
@@ -35,6 +38,9 @@ public slots:
     void replace();
     void highlightFindContent();
     void clearHighlightContent();      //清除当前由“查找”产生的高亮
+
+//protected slots:
+//    void wheelEvent(QWheelEvent *e);
 
 private slots:
     void appendFileToEditor(QTreeWidgetItem*, int);
@@ -92,10 +98,18 @@ private:
     QAction* ac_select_all;
 //! [edit]
 
+    QAction* ac_binedit;
+    QAction* ac_zoomin;
+    QAction* ac_zoomout;
+    QAction* ac_editsettings;
+
     QMenuBar* menuBar;
     QMenu* fileMenu;
     QMenu* editMenu;
+    QMenu* viewMenu;
+    QMenu* pluginMenu;
     QMenu* FileTreeContextMenu;
+    QMenu* settingsMenu;
 
     QStatusBar* stbar;
     BinaryEditor* binEdit;
@@ -104,8 +118,14 @@ private:
     QToolBar* toolBar;
     QListWidget* openedFileList;
     QTreeWidget* fileTree;
+
     replaceDialog* replace_dialog;
     FilePropertyDialog* fileproperty_dialog;
+    SettingsDialog* settings_dialog;
+
     QHash<QString, QString> textMap;
 };
+
 #endif // MAINWINDOW_H
+
+

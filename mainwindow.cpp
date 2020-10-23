@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QStatusBar>
 #include <QLabel>
+#include <QApplication>
 
 //#include "ui_mainwindow.h"
 
@@ -41,7 +42,7 @@ void MainWindow::createMenu()
     ac_openfile = new QAction(QIcon(":/resources/icons/fileopen.png"), "打开文件(&O)");
     ac_open_project = new QAction(QIcon(":/resources/icons/openproject.png"), "打开项目");
     ac_savefile = new QAction(QIcon(":/resources/icons/filesave.png"), "保存(&S)");
-    ac_save_as = new QAction("另存为(&A)");
+    ac_save_as = new QAction("另存为(&A)...");
     ac_quit = new QAction(QIcon(":/resources/icons/fileclose.png"), "关闭(&Q)");
 
     connect(ac_newfile, &QAction::triggered, this, &MainWindow::newFile);
@@ -115,6 +116,71 @@ void MainWindow::createMenu()
     menuBar->addMenu(editMenu);
     //!-----[editmenu]-----
 
+    //!-----[viewmenu]-----
+    viewMenu = new QMenu(this);
+    viewMenu->setTitle("视图(&V)");             //新建插件菜单
+
+    ac_zoomin = new QAction(QIcon(":/resources/icons/zoomin.png"), "放大(&I)");
+    ac_zoomout = new QAction(QIcon(":/resources/icons/zoomout.png"), "缩小(&O)");
+
+    connect(ac_zoomin, &QAction::triggered, [=](){
+        globalFont->setPixelSize(globalFont->pixelSize() + 1);
+        textEdit->setFont(*globalFont);
+        //binEdit->resetFont();
+        if (editArea->currentIndex() == 1)
+            binEdit->viewport()->update();
+    });
+    connect(ac_zoomout, &QAction::triggered, [=](){
+        if (globalFont->pixelSize() > 1)
+            globalFont->setPixelSize(globalFont->pixelSize() - 1);
+        textEdit->setFont(*globalFont);
+        //binEdit->resetFont();
+        if (editArea->currentIndex() == 1)
+            binEdit->viewport()->update();
+    });                                        //给二进制文本编辑器feed数据
+
+    viewMenu->addAction(ac_zoomin);
+    viewMenu->addAction(ac_zoomout);
+    menuBar->addMenu(viewMenu);
+    //!-----[viewmenu]-----
+
+    //!-----[settingsmenu]-----
+    settingsMenu = new QMenu(this);
+    settingsMenu->setTitle("设置(&S)");             //新建设置菜单
+
+    ac_editsettings = new QAction(QIcon(":/resources/icons/settings.png"), "编辑器外观设置...(&E)");
+
+    connect(ac_editsettings, &QAction::triggered, [=](){
+        settings_dialog->initialize();
+    });                                      //给二进制文本编辑器feed数据
+
+    settingsMenu->addAction(ac_editsettings);
+    menuBar->addMenu(settingsMenu);
+    //!-----[settingsmenu]-----
+
+    //!-----[pluginmenu]-----
+    pluginMenu = new QMenu(this);
+    pluginMenu->setTitle("插件(&P)");             //新建插件菜单
+
+    ac_binedit = new QAction(QIcon(":/resources/icons/binedit.png"), "二进制编辑器...(&B)");
+    ac_binedit->setCheckable(true);
+    ac_binedit->setChecked(false);               //二进制文本编辑器
+
+    connect(ac_binedit, &QAction::toggled, [=](){
+        if (ac_binedit->isChecked()) {
+            binEdit->setTextString(textEdit->toPlainText());
+            editArea->setCurrentIndex(1);
+        } else
+            editArea->setCurrentIndex(0);
+    });
+    connect(textEdit, &customEdit::textChanged, [=](){
+        if (editArea->currentIndex() == 1)
+            binEdit->setTextString(textEdit->toPlainText());
+    });                                         //给二进制文本编辑器feed数据
+
+    pluginMenu->addAction(ac_binedit);
+    menuBar->addMenu(pluginMenu);
+    //!-----[pluginmenu]-----
 }
 
 void MainWindow::createToolBar()
@@ -135,6 +201,11 @@ void MainWindow::createToolBar()
     tb->addSeparator();
     tb->addAction(ac_find);
     tb->addAction(ac_replace);
+    tb->addSeparator();
+    tb->addAction(ac_zoomin);
+    tb->addAction(ac_zoomout);
+    tb->addSeparator();
+    tb->addAction(ac_binedit);
 }
 
 void MainWindow::setupDialogs()
@@ -143,12 +214,15 @@ void MainWindow::setupDialogs()
     replace_dialog->hide();
     fileproperty_dialog = new FilePropertyDialog(this);
     fileproperty_dialog->hide();
+    settings_dialog = new SettingsDialog(this);
 }
 
 void MainWindow::setupTextEdit()
 {
     textEdit = new customEdit(this);
+    textEdit->setMainWindow(this);
     binEdit = new BinaryEditor(this);
+    binEdit->setRelatedTextEdit(textEdit);
 }
 
 void MainWindow::createUI()
@@ -167,7 +241,7 @@ void MainWindow::createUI()
 
     QFile ScrollBarStyle(":/resources/styles/scrollbar.qss");
     ScrollBarStyle.open(QFile::ReadOnly);
-    qDebug() << QLatin1String(ScrollBarStyle.readAll());
+    //qDebug() << QLatin1String(ScrollBarStyle.readAll());
     openedFileList->horizontalScrollBar()->setStyleSheet(QLatin1String(ScrollBarStyle.readAll()));
 
     QSplitter *HSplitter = new QSplitter(this);
@@ -186,6 +260,7 @@ void MainWindow::createUI()
     HSplitter->setStretchFactor(1, 3);
     setCentralWidget(HSplitter);
 
+    editArea->setCurrentIndex(0);
     stbar = new QStatusBar(this);
     stbar->showMessage("Ready");
     stbar->setSizeGripEnabled(false);
@@ -210,7 +285,7 @@ void MainWindow::deleteChildren(QTreeWidgetItem* root)
     int num_child = root->childCount();
     for (int i = 0; i < num_child; i++)
         deleteChildren(root->child(i));
-    qDebug() << "del:" << root->text(0);
+    //qDebug() << "del:" << root->text(0);
     delete(root);
 }
 
@@ -251,7 +326,7 @@ void MainWindow::trace(QString path, QTreeWidgetItem* root)
         if(info.isDir())
         {
             //如果是目录，则进行递归遍历
-            qDebug() << info.fileName();
+            //qDebug() << info.fileName();
             QTreeWidgetItem *item = new QTreeWidgetItem(root);
             item->setText(0, info.fileName());
             item->setIcon(0, QFileIconProvider().icon(info));
@@ -666,6 +741,16 @@ void MainWindow::setCurrentFileName(QString Filename)
     QString fn = QFileInfo(Filename).fileName();
     QString fn_ = (fn.isEmpty() ? "" : fn + " @ TextEdit");
     setWindowTitle(fn_);
+}
+
+void MainWindow::zoomin()
+{
+    ac_zoomin->trigger();
+}
+
+void MainWindow::zoomout()
+{
+    ac_zoomout->trigger();
 }
 
 MainWindow::~MainWindow()

@@ -59,6 +59,7 @@ QStringList Completer::conformingWords(QString& prefix) { //给定prefix,返回�
     return wordlist;
 }
 
-Completer::~Completer() {
+Completer::~Completer()
+{
 
 }

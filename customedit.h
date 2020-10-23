@@ -7,6 +7,7 @@
 #include "completer.h"
 
 class replaceDialog;
+class MainWindow;
 
 class customEdit : public QPlainTextEdit
 {
@@ -14,9 +15,12 @@ class customEdit : public QPlainTextEdit
 public:
     customEdit(QWidget* parent = nullptr);
     ~customEdit();
+    void setMainWindow(MainWindow* mw);
+    MainWindow* getMainWindow();
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
 
 private slots:
     void highlightCurrentLine();
@@ -26,7 +30,9 @@ private:
     QListWidget* wordList;
     Completer* customCompleter;
     replaceDialog* replace_dialog;
-    QFont globalFont;
+    MainWindow* main_window;
 };
+
+extern QFont* globalFont;
 
 #endif // CUSTOMEDIT_H

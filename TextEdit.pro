@@ -24,7 +24,8 @@ SOURCES += \
     highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
-    replacedialog.cpp
+    replacedialog.cpp \
+    settingsdialog.cpp
 
 HEADERS += \
     binaryeditor.h \
@@ -33,11 +34,13 @@ HEADERS += \
     filepropertydialog.h \
     highlighter.h \
     mainwindow.h \
-    replacedialog.h
+    replacedialog.h \
+    settingsdialog.h
 
 FORMS += \
     filepropertydialog.ui \
-    replacedialog.ui
+    replacedialog.ui \
+    settingsdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

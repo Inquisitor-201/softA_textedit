@@ -84,6 +84,7 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent)
 
     QTextCharFormat keywordFormat;
     keywordFormat.setFontWeight(QFont::Bold);
+    keywordFormat.setFontItalic(true);
     for (const QString& pattern : keyword_patterns){
         rules.push_back((Rule){QRegularExpression(pattern), keywordFormat});
     }                                                                          //keyword样式
