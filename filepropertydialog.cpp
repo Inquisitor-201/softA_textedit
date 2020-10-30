@@ -39,4 +39,3 @@ FilePropertyDialog::~FilePropertyDialog()
 {
     delete ui;
 }
-

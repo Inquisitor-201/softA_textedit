@@ -11,11 +11,14 @@
 #include <QHash>
 #include <QList>
 #include <QStackedWidget>
+#include "videoutils.h"
 #include "highlighter.h"
 #include "customedit.h"
 #include "filepropertydialog.h"
 #include "binaryeditor.h"
 #include "settingsdialog.h"
+#include "upperwidget.h"
+#include "snake.h"
 
 class replaceDialog;
 //QT_BEGIN_NAMESPACE
@@ -31,6 +34,8 @@ public:
     ~MainWindow();
     void zoomin();
     void zoomout();
+    QTreeWidget* filetree();
+    UpperWidget* upperwidget();
 
 public slots:
     void findNext();
@@ -45,6 +50,7 @@ public slots:
 private slots:
     void appendFileToEditor(QTreeWidgetItem*, int);
     void popupContextMenu(const QPoint &pos);
+    void on_comboboxIndexChanged(int);
 
 private:
     void setCurrentFileName(QString);
@@ -60,7 +66,7 @@ private:
     void openProject();
     bool saveFile();                   //保存文件（若已存在文件名，则直接保存，否则调用getSaveFileName)
     bool saveAs();                     //另存为
-    bool QuitProgram();                //关闭程序
+    bool closeFile();                //关闭程序
 
     bool saveAsFile(QString);          //给定一个QString filename，将文本框的内容保存到filename的文件中
     bool getSaveFileName(QString*);    //展示一个QFileDialog, 将需要保存的文件名存放到给定地址中
@@ -102,6 +108,11 @@ private:
     QAction* ac_zoomin;
     QAction* ac_zoomout;
     QAction* ac_editsettings;
+    QAction* ac_show_file_tree;
+    QAction* ac_show_upper_widget;
+    QAction* ac_char_video_viewer;
+    QAction* ac_game2048;
+    QAction* ac_gamesnake;
 
     QMenuBar* menuBar;
     QMenu* fileMenu;
@@ -114,10 +125,10 @@ private:
     QStatusBar* stbar;
     BinaryEditor* binEdit;
     QStackedWidget* editArea;
-
+    CharVideoViewer* charvideo_viewer;
     QToolBar* toolBar;
-    QListWidget* openedFileList;
     QTreeWidget* fileTree;
+    UpperWidget* upper_widget;
 
     replaceDialog* replace_dialog;
     FilePropertyDialog* fileproperty_dialog;

@@ -15,15 +15,17 @@ class customEdit : public QPlainTextEdit
 public:
     customEdit(QWidget* parent = nullptr);
     ~customEdit();
-    void setMainWindow(MainWindow* mw);
     MainWindow* getMainWindow();
+    Highlighter* highlighter();
+    void resetAppearance();
+    void setMainWindow(MainWindow* mw);
+
+public slots:
+    void highlightCurrentLine();
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
-
-private slots:
-    void highlightCurrentLine();
 
 private:
     Highlighter* customHighlighter;
@@ -34,5 +36,8 @@ private:
 };
 
 extern QFont* globalFont;
-
+extern QColor background_color;
+extern QColor selected_bg_color;
+extern QColor current_line_color;
+extern QColor global_text_color;
 #endif // CUSTOMEDIT_H

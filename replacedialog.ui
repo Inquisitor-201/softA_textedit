@@ -44,6 +44,9 @@
        <height>26</height>
       </rect>
      </property>
+     <property name="plainText">
+      <string/>
+     </property>
     </widget>
     <widget class="QCheckBox" name="check_repeat">
      <property name="geometry">

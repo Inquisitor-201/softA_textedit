@@ -32,5 +32,7 @@
         <file>resources/icons/editreplace.png</file>
         <file>resources/icons/binedit.png</file>
         <file>resources/icons/settings.png</file>
+        <file>resources/icons/closebutton.png</file>
+        <file>resources/icons/videoviewer.png</file>
     </qresource>
 </RCC>

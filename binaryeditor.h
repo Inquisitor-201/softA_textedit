@@ -19,7 +19,7 @@ protected:
     void paintEvent(QPaintEvent* e) override;
     void wheelEvent(QWheelEvent *e) override;
     void keyPressEvent(QKeyEvent *event) override;
-
+    void mousePressEvent(QMouseEvent *e) override;
 private:
     customEdit* textEdit;
 

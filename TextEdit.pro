@@ -1,7 +1,7 @@
-QT       += core gui \
+QT       += core gui multimedia \
     quick
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimediawidgets
 
 CONFIG += c++11
 
@@ -21,26 +21,41 @@ SOURCES += \
     completer.cpp \
     customedit.cpp \
     filepropertydialog.cpp \
+    game2048.cpp \
     highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
     replacedialog.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    upperwidget.cpp \
+    videoutils.cpp \
+    snake.cpp \
+    snake_normal.cpp \
+    snake_difficult.cpp
 
 HEADERS += \
     binaryeditor.h \
     completer.h \
     customedit.h \
     filepropertydialog.h \
+    game2048.h \
     highlighter.h \
     mainwindow.h \
     replacedialog.h \
-    settingsdialog.h
+    settingsdialog.h \
+    upperwidget.h \
+    videoutils.h \
+    snake.h \
+    snake_normal.h \
+    snake_difficult.h
 
 FORMS += \
     filepropertydialog.ui \
     replacedialog.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    snake_normal.ui \
+    snake_difficult.ui \
+    snake.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -49,3 +64,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+

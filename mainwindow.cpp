@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "replacedialog.h"
+#include "game2048.h"
 #include <QDebug>
 #include <QFileDialog>
 #include <QTextStream>
@@ -12,6 +13,7 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QApplication>
+#include <QVBoxLayout>
 
 //#include "ui_mainwindow.h"
 
@@ -23,11 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     setupTextEdit();
     setupDialogs();
+    createUI();
     createMenu();
     createToolBar();
-    createUI();
-
-    createContextMenu();
 }
 
 void MainWindow::createMenu()
@@ -50,7 +50,7 @@ void MainWindow::createMenu()
     connect(ac_open_project, &QAction::triggered, this, &MainWindow::openProject);
     connect(ac_savefile, &QAction::triggered, this, &MainWindow::saveFile);
     connect(ac_save_as, &QAction::triggered, this, &MainWindow::saveAs);
-    connect(ac_quit, &QAction::triggered, this, &MainWindow::QuitProgram);
+    connect(ac_quit, &QAction::triggered, this, &MainWindow::closeFile);
 
     ac_newfile->setShortcut(QKeySequence::New);
     ac_openfile->setShortcut(QKeySequence::Open);
@@ -122,6 +122,12 @@ void MainWindow::createMenu()
 
     ac_zoomin = new QAction(QIcon(":/resources/icons/zoomin.png"), "放大(&I)");
     ac_zoomout = new QAction(QIcon(":/resources/icons/zoomout.png"), "缩小(&O)");
+    ac_show_file_tree = new QAction("显示文件树");
+    ac_show_upper_widget = new QAction("显示已打开文件");
+    ac_show_file_tree->setCheckable(true);
+    ac_show_upper_widget->setCheckable(true);
+    ac_show_file_tree->setChecked(true);
+    ac_show_upper_widget->setChecked(true);
 
     connect(ac_zoomin, &QAction::triggered, [=](){
         globalFont->setPixelSize(globalFont->pixelSize() + 1);
@@ -130,6 +136,7 @@ void MainWindow::createMenu()
         if (editArea->currentIndex() == 1)
             binEdit->viewport()->update();
     });
+
     connect(ac_zoomout, &QAction::triggered, [=](){
         if (globalFont->pixelSize() > 1)
             globalFont->setPixelSize(globalFont->pixelSize() - 1);
@@ -139,8 +146,19 @@ void MainWindow::createMenu()
             binEdit->viewport()->update();
     });                                        //给二进制文本编辑器feed数据
 
+    connect(ac_show_file_tree, &QAction::toggled, [=](){
+        fileTree->setVisible(ac_show_file_tree->isChecked());
+    });
+
+    connect(ac_show_upper_widget, &QAction::toggled, [=](){
+        upper_widget->setVisible(ac_show_upper_widget->isChecked());
+    });
+
     viewMenu->addAction(ac_zoomin);
     viewMenu->addAction(ac_zoomout);
+    viewMenu->addSeparator();
+    viewMenu->addAction(ac_show_file_tree);
+    viewMenu->addAction(ac_show_upper_widget);
     menuBar->addMenu(viewMenu);
     //!-----[viewmenu]-----
 
@@ -166,6 +184,13 @@ void MainWindow::createMenu()
     ac_binedit->setCheckable(true);
     ac_binedit->setChecked(false);               //二进制文本编辑器
 
+    ac_game2048 = new QAction("GAME2048...");
+    ac_char_video_viewer = new QAction(QIcon(":/resources/icons/videoviewer.png"), "字符动画...(&V)");
+
+    ac_gamesnake = new QAction("GAMEsnake...");
+
+
+
     connect(ac_binedit, &QAction::toggled, [=](){
         if (ac_binedit->isChecked()) {
             binEdit->setTextString(textEdit->toPlainText());
@@ -173,12 +198,44 @@ void MainWindow::createMenu()
         } else
             editArea->setCurrentIndex(0);
     });
+
     connect(textEdit, &customEdit::textChanged, [=](){
         if (editArea->currentIndex() == 1)
             binEdit->setTextString(textEdit->toPlainText());
     });                                         //给二进制文本编辑器feed数据
 
+    connect(ac_char_video_viewer, &QAction::triggered, [=](){
+        QString filepath = QFileDialog::getOpenFileName(this, "打开视频文件", "./", "mp4 File (*.mp4)");
+        if (filepath.isEmpty() || QFileInfo(filepath).suffix() != "mp4")
+            return;
+        charvideo_viewer->initialize(QUrl::fromLocalFile(filepath));
+        editArea->setCurrentIndex(2);
+    });
+
+    connect(charvideo_viewer, &CharVideoViewer::videoTerminated, [=](){
+        editArea->setCurrentIndex(0);
+    });
+
+    connect(ac_game2048, &QAction::triggered, [=](){
+        qDebug("ok");
+        GAME2048 w;
+        w.setFixedSize(320,480);
+        w.setWindowTitle("2048");
+        w.exec();
+    });
+
+    connect(ac_gamesnake, &QAction::triggered, [=](){
+        qDebug("ok");
+
+        snake w;
+        w.exec();
+
+    });
+
     pluginMenu->addAction(ac_binedit);
+    pluginMenu->addAction(ac_char_video_viewer);
+    pluginMenu->addAction(ac_game2048);
+    pluginMenu->addAction(ac_gamesnake);
     menuBar->addMenu(pluginMenu);
     //!-----[pluginmenu]-----
 }
@@ -206,15 +263,16 @@ void MainWindow::createToolBar()
     tb->addAction(ac_zoomout);
     tb->addSeparator();
     tb->addAction(ac_binedit);
+    tb->addAction(ac_char_video_viewer);
 }
 
 void MainWindow::setupDialogs()
 {
     replace_dialog = new replaceDialog(this);
-    replace_dialog->hide();
     fileproperty_dialog = new FilePropertyDialog(this);
-    fileproperty_dialog->hide();
     settings_dialog = new SettingsDialog(this);
+    settings_dialog->setEditor(textEdit);
+    settings_dialog->setMainWindow(this);
 }
 
 void MainWindow::setupTextEdit()
@@ -235,26 +293,31 @@ void MainWindow::createUI()
     fileTree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(fileTree, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(popupContextMenu(const QPoint&)));
 
-    openedFileList = new QListWidget();
-    openedFileList->setFixedHeight(25);
-    openedFileList->setFlow(QListView::LeftToRight);
-
-    QFile ScrollBarStyle(":/resources/styles/scrollbar.qss");
-    ScrollBarStyle.open(QFile::ReadOnly);
-    //qDebug() << QLatin1String(ScrollBarStyle.readAll());
-    openedFileList->horizontalScrollBar()->setStyleSheet(QLatin1String(ScrollBarStyle.readAll()));
-
     QSplitter *HSplitter = new QSplitter(this);
-    QSplitter *VSplitter = new QSplitter(this);  //设置水平和垂直布局器
-    VSplitter->setOrientation(Qt::Vertical);
-    VSplitter->addWidget(openedFileList);
+    QVBoxLayout *rightArea_layout = new QVBoxLayout(this);  //设置水平和垂直布局器
+    QWidget *rightArea = new QWidget(this);
+    rightArea->setLayout(rightArea_layout);
 
     editArea = new QStackedWidget(this);
+    charvideo_viewer = new CharVideoViewer(this);
+    upper_widget = new UpperWidget(this);
+    connect(upper_widget->comboBox(), SIGNAL(currentIndexChanged(int)),
+            this, SLOT(on_comboboxIndexChanged(int)));
+    connect(upper_widget->buttonClose(), &QPushButton::clicked, [=](){
+        closeFile();
+    });
+
     editArea->addWidget(textEdit);
     editArea->addWidget(binEdit);
-    VSplitter->addWidget(editArea);
+    editArea->addWidget(charvideo_viewer);
+
+    rightArea_layout->setMargin(0);
+    rightArea_layout->setSpacing(4);
+    rightArea_layout->addWidget(upper_widget);
+    rightArea_layout->addWidget(editArea);
+
     HSplitter->addWidget(fileTree);
-    HSplitter->addWidget(VSplitter);
+    HSplitter->addWidget(rightArea);
 
     HSplitter->setStretchFactor(0, 1);
     HSplitter->setStretchFactor(1, 3);
@@ -344,11 +407,11 @@ void MainWindow::trace(QString path, QTreeWidgetItem* root)
     }
 }
 
-void MainWindow::appendFileToEditor(QTreeWidgetItem* vertex, int column)
+void MainWindow::appendFileToEditor(QTreeWidgetItem* vertex, int column) //从左侧边栏打开文件，加入editor中
 {
-    QString filename = vertex->data(column, Qt::UserRole).value<QString>();
+    QString filepath = vertex->data(column, Qt::UserRole).value<QString>();
 
-    QFile file(filename);
+    QFile file(filepath);
     QFileInfo fi(file);
     if (fi.isDir())
         return;
@@ -358,49 +421,39 @@ void MainWindow::appendFileToEditor(QTreeWidgetItem* vertex, int column)
         return;
     }
 
-    QHash<QString, QString>::const_iterator i = textMap.find(filename);
     QString content;
-    if (i == textMap.end()) {   //该文件没有被打开的情况
+    if (textMap.find(filepath) == textMap.end()) {   //该文件没有被打开的情况
         QTextStream in(&file);
         content = in.readAll().toUtf8();
-        textMap[filename] = content;
-        openedFileList->addItem(fi.fileName());
+        textMap[filepath] = content;
+        upper_widget->appendFile(filepath);
     } else {                    //该文件已经被打开的情况
-        content = textMap[filename];
+        content = textMap[filepath];
     }
-    setCurrentFileName(filename);
+    setCurrentFileName(filepath);
     textEdit->setPlainText(content);
+}
+
+void MainWindow::on_comboboxIndexChanged(int index)
+{
+    QString str = upper_widget->comboBox()->itemData(index).value<QString>();
+    if (textMap.find(str) == textMap.end()) return;
+    textEdit->setPlainText(textMap[str]);
+    setCurrentFileName(str);
 }
 
 void MainWindow::popupContextMenu(const QPoint& pos)
 {
-    QTreeWidgetItem* item = fileTree->itemAt(pos);
-    selected_filetree_filename = item->data(0, Qt::UserRole).value<QString>();  //已选中的文件名
-    selected_filetree_widget = item;                                            //已选中的项
-    QAction *ac_close_project, *ac_separator;
-    if (!item->parent()) {   //是top-level的item
-        ac_separator = FileTreeContextMenu->addSeparator();
-        ac_close_project = FileTreeContextMenu->addAction("关闭该项目");
-        connect(ac_close_project, &QAction::triggered, [=](){
-            deleteChildren(item);
-        });
-    }
-    FileTreeContextMenu->exec(QCursor::pos());
-    if (!item->parent()) {   //是top-level的item
-        FileTreeContextMenu->removeAction(ac_separator);
-        FileTreeContextMenu->removeAction(ac_separator);
-        delete ac_close_project;
-        delete ac_separator;
-    }
-}
-
-void MainWindow::createContextMenu()
-{
     FileTreeContextMenu = new QMenu(this);
+
     QAction* ac_showProperty = FileTreeContextMenu->addAction("显示文件属性...");
     QAction* ac_deleteFile = FileTreeContextMenu->addAction("从磁盘上删除文件...");
     FileTreeContextMenu->addSeparator();
     QAction* ac_openInExplorer =  FileTreeContextMenu->addAction("在Explorer中显示");
+
+    ac_showProperty->deleteLater();
+    ac_deleteFile->deleteLater();
+    ac_openInExplorer->deleteLater();
 
     connect(ac_openInExplorer, &QAction::triggered, this, &MainWindow::openInExplorer);
     connect(ac_showProperty, &QAction::triggered, [=](){
@@ -424,6 +477,22 @@ void MainWindow::createContextMenu()
                 QFile(selected_filetree_filename).remove();
         }
     });
+
+    QTreeWidgetItem* item = fileTree->itemAt(pos);
+    if (!item) return;
+    selected_filetree_filename = item->data(0, Qt::UserRole).value<QString>();  //已选中的文件名
+    selected_filetree_widget = item;                                            //已选中的项
+
+    if (!item->parent()) {   //是top-level的item
+        FileTreeContextMenu->addSeparator();
+        QAction *ac_close_project = FileTreeContextMenu->addAction("关闭该项目");
+        ac_close_project->deleteLater();
+        connect(ac_close_project, &QAction::triggered, [=](){
+            deleteChildren(item);
+        });
+    }
+    FileTreeContextMenu->exec(cursor().pos());
+    delete FileTreeContextMenu;
 }
 
 bool MainWindow::newFile()
@@ -458,7 +527,7 @@ bool MainWindow::openFile()          //打开文件
         }
         content = QTextStream(&file).readAll().toUtf8();
         textMap[filename] = content;
-        openedFileList->addItem(QFileInfo(file).fileName());
+        //openedFileList->addItem(QFileInfo(file).fileName());
     } else {                    //该文件已经被打开的情况
         content = textMap[filename];
     }
@@ -521,11 +590,25 @@ bool MainWindow::saveFile()
     return ret;
 }
 
-bool MainWindow::QuitProgram()
+bool MainWindow::closeFile()
 {
     if (!querySave())
         return false;
-    return close();
+    if (!upper_widget->comboBox()->count())
+        return false;
+    QComboBox* cb = upper_widget->comboBox();
+    int cur = cb->currentIndex();
+    textMap.remove(cb->itemData(cur).value<QString>());
+    upper_widget->comboBox()->removeItem(cur);
+
+    if (upper_widget->comboBox()->count()){
+        textEdit->setPlainText(textMap[cb->currentData().value<QString>()]);
+        setCurrentFileName(cb->currentData().value<QString>());
+    } else {
+        textEdit->setPlainText("");
+        setCurrentFileName("");
+    }
+    return true;
 }
 
 bool MainWindow::querySave()
@@ -555,9 +638,7 @@ bool MainWindow::querySave()
 
 void MainWindow::clearHighlightContent()
 {
-    QTextCursor cs = textEdit->textCursor();
-    cs.select(QTextCursor::Document);
-    cs.setCharFormat(QTextCharFormat());        //清空已有高亮
+    textEdit->resetAppearance(); //清空已有高亮
 }
 
 void MainWindow::highlightFindContent()
@@ -733,6 +814,14 @@ void MainWindow::replaceAll()
     else
         msgbox.setText(QString("无法替换，因为未找到\"%1\"").arg(replace_dialog->findContent()));
     msgbox.exec();
+}
+
+QTreeWidget* MainWindow::filetree(){
+    return fileTree;
+}
+
+UpperWidget* MainWindow::upperwidget(){
+    return upper_widget;
 }
 
 void MainWindow::setCurrentFileName(QString Filename)

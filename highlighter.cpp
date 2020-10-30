@@ -2,116 +2,123 @@
 #include <QRegularExpression>
 #include <QDebug>
 
+QTextCharFormat keywordFormat;
+QTextCharFormat numberFormat;
+QTextCharFormat operatorFormat;
+QTextCharFormat quotationFormat;
+QTextCharFormat precomplingInstructionFormat;
+QTextCharFormat singleLineCommentFormat;
+QTextCharFormat multiLineCommentFormat;
+
 Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent)
 {
-    const QString keyword_patterns[] = {
-        QStringLiteral("\\balignas\\b"),
-        QStringLiteral("\\bconstexpr\\b"),
-        QStringLiteral("\\bchar16_t\\b"),
-        QStringLiteral("\\bchar32_t\\b"),
-        QStringLiteral("\\bdecltype\\b"),
-        QStringLiteral("\\bnullptr\\b"),
-        QStringLiteral("\\bnoexcept\\b"),
-        QStringLiteral("\\bstatic_assert\\b"),
-        QStringLiteral("\\bauto\\b"),
-        QStringLiteral("\\basm\\b"),
-        QStringLiteral("\\bauto\\b"),
-        QStringLiteral("\\bbool\\b"),
-        QStringLiteral("\\btrue\\b"),
-        QStringLiteral("\\bfalse\\b"),
-        QStringLiteral("\\bbreak\\b"),
-        QStringLiteral("\\bcontinue\\b"),
-        QStringLiteral("\\bgoto\\b"),
-        QStringLiteral("\\bcase\\b"),
-        QStringLiteral("\\bdefault\\b"),
-        QStringLiteral("\\bswitch\\b"),
-        QStringLiteral("\\bcatch\\b"),
-        QStringLiteral("\\bthrow\\b"),
-        QStringLiteral("\\btry\\b"),
-        QStringLiteral("\\bchar\\b"),
-        QStringLiteral("\\bwchar_t\\b"),
-        QStringLiteral("\\bconst\\b"),
-        QStringLiteral("\\bvolatile\\b"),
-        QStringLiteral("\\bstruct\\b"),
-        QStringLiteral("\\bclass\\b"),
-        QStringLiteral("\\bunion\\b"),
-        QStringLiteral("\\bdelete\\b"),
-        QStringLiteral("\\bnew\\b"),
-        QStringLiteral("\\bdo\\b"),
-        QStringLiteral("\\bfor\\b"),
-        QStringLiteral("\\bwhile\\b"),
-        QStringLiteral("\\bif\\b"),
-        QStringLiteral("\\belse\\b"),
-        QStringLiteral("\\benum\\b"),
-        QStringLiteral("\\bexplicit\\b"),
-        QStringLiteral("\\bexport\\b"),
-        QStringLiteral("\\bextern\\b"),
-        QStringLiteral("\\bfriend\\b"),
-        QStringLiteral("\\binline\\b"),
-        QStringLiteral("\\bmutable\\b"),
-        QStringLiteral("\\bnamespace\\b"),
-        QStringLiteral("\\boperator\\b"),
-        QStringLiteral("\\bprivate\\b"),
-        QStringLiteral("\\bprotected\\b"),
-        QStringLiteral("\\bpublic\\b"),
-        QStringLiteral("\\bregister\\b"),
-        QStringLiteral("\\breturn\\b"),
-        QStringLiteral("\\bstatic\\b"),
-        QStringLiteral("\\bsizeof\\b"),
-        QStringLiteral("\\btemplate\\b"),
-        QStringLiteral("\\bthis\\b"),
-        QStringLiteral("\\btypedef\\b"),
-        QStringLiteral("\\bvirtual\\b"),
-        QStringLiteral("\\btypeid\\b"),
-        QStringLiteral("\\btypename\\b"),
-        QStringLiteral("\\busing\\b"),
-        QStringLiteral("\\bvoid\\b"),
-        QStringLiteral("\\btry\\b"),
-        QStringLiteral("\\bchar\\b"),
-        QStringLiteral("\\bint\\b"),
-        QStringLiteral("\\bclass\\b"),
-        QStringLiteral("\\bconst\\b"),
-        QStringLiteral("\\bint\\b"),
-        QStringLiteral("\\bconst_cast\\b"),
-        QStringLiteral("\\bdouble\\b"),
-        QStringLiteral("\\bdynamic_cast\\b"),
-        QStringLiteral("\\bfloat\\b"),
-        QStringLiteral("\\blong\\b"),
-        QStringLiteral("\\breinterpret_cast\\b"),
-        QStringLiteral("\\bstatic_cast\\b"),
-        QStringLiteral("\\bunsigned\\b"),
+    keyword_patterns = {
+        QString("\\balignas\\b"),
+        QString("\\bconstexpr\\b"),
+        QString("\\bchar16_t\\b"),
+        QString("\\bchar32_t\\b"),
+        QString("\\bdecltype\\b"),
+        QString("\\bnullptr\\b"),
+        QString("\\bnoexcept\\b"),
+        QString("\\bstatic_assert\\b"),
+        QString("\\bauto\\b"),
+        QString("\\basm\\b"),
+        QString("\\bauto\\b"),
+        QString("\\bbool\\b"),
+        QString("\\btrue\\b"),
+        QString("\\bfalse\\b"),
+        QString("\\bbreak\\b"),
+        QString("\\bcontinue\\b"),
+        QString("\\bgoto\\b"),
+        QString("\\bcase\\b"),
+        QString("\\bdefault\\b"),
+        QString("\\bswitch\\b"),
+        QString("\\bcatch\\b"),
+        QString("\\bthrow\\b"),
+        QString("\\btry\\b"),
+        QString("\\bchar\\b"),
+        QString("\\bwchar_t\\b"),
+        QString("\\bconst\\b"),
+        QString("\\bvolatile\\b"),
+        QString("\\bstruct\\b"),
+        QString("\\bclass\\b"),
+        QString("\\bunion\\b"),
+        QString("\\bdelete\\b"),
+        QString("\\bnew\\b"),
+        QString("\\bdo\\b"),
+        QString("\\bfor\\b"),
+        QString("\\bwhile\\b"),
+        QString("\\bif\\b"),
+        QString("\\belse\\b"),
+        QString("\\benum\\b"),
+        QString("\\bexplicit\\b"),
+        QString("\\bexport\\b"),
+        QString("\\bextern\\b"),
+        QString("\\bfriend\\b"),
+        QString("\\binline\\b"),
+        QString("\\bmutable\\b"),
+        QString("\\bnamespace\\b"),
+        QString("\\boperator\\b"),
+        QString("\\bprivate\\b"),
+        QString("\\bprotected\\b"),
+        QString("\\bpublic\\b"),
+        QString("\\bregister\\b"),
+        QString("\\breturn\\b"),
+        QString("\\bstatic\\b"),
+        QString("\\bsizeof\\b"),
+        QString("\\btemplate\\b"),
+        QString("\\bthis\\b"),
+        QString("\\btypedef\\b"),
+        QString("\\bvirtual\\b"),
+        QString("\\btypeid\\b"),
+        QString("\\btypename\\b"),
+        QString("\\busing\\b"),
+        QString("\\bvoid\\b"),
+        QString("\\btry\\b"),
+        QString("\\bchar\\b"),
+        QString("\\bint\\b"),
+        QString("\\bclass\\b"),
+        QString("\\bconst\\b"),
+        QString("\\bint\\b"),
+        QString("\\bconst_cast\\b"),
+        QString("\\bdouble\\b"),
+        QString("\\bdynamic_cast\\b"),
+        QString("\\bfloat\\b"),
+        QString("\\blong\\b"),
+        QString("\\breinterpret_cast\\b"),
+        QString("\\bstatic_cast\\b"),
+        QString("\\bunsigned\\b"),
     };
-
-    QTextCharFormat keywordFormat;
     keywordFormat.setFontWeight(QFont::Bold);
     keywordFormat.setFontItalic(true);
-    for (const QString& pattern : keyword_patterns){
-        rules.push_back((Rule){QRegularExpression(pattern), keywordFormat});
-    }                                                                          //keyword样式
 
-    QTextCharFormat numberFormat;
     numberFormat.setForeground(QBrush(QColor(128, 0, 128)));
-    rules.push_back((Rule){QRegularExpression("\\b[0-9]+\\b"), numberFormat}); //number样式
 
-    QTextCharFormat operatorFormat;
     operatorFormat.setForeground(QBrush(QColor(255, 0, 0)));
-    rules.push_back((Rule){QRegularExpression("[,;()\\{\\}\\[\\]\\~\\!\\@\\#\\$\\%\\^\\&\\-\\=\\+\\*\\?<>:]"), operatorFormat});
 
-    QTextCharFormat quotationFormat;
     quotationFormat.setForeground(QBrush(QColor(0, 0, 255)));
-    rules.push_back((Rule){QRegularExpression("\".*\""), quotationFormat});
 
-    QTextCharFormat precomplingInstructionFormat;
     precomplingInstructionFormat.setForeground(QBrush(QColor(0, 128, 0)));
-    rules.push_back((Rule){QRegularExpression("^#.*$"), precomplingInstructionFormat});  //预编译指令样式
 
-    QTextCharFormat singleLineCommentFormat;
     singleLineCommentFormat.setFontItalic(true);
     singleLineCommentFormat.setForeground(QBrush(QColor(0, 120, 222)));
-    rules.push_back((Rule){QRegularExpression("//.*$"), singleLineCommentFormat});  //单行注释样式
 
     multiLineCommentFormat.setFontItalic(true);
     multiLineCommentFormat.setForeground(QBrush(QColor(0, 120, 222)));
+    resetRules();
+}
+
+void Highlighter::resetRules()
+{
+    rules.clear();
+    for (const QString& pattern : qAsConst(keyword_patterns)){
+        rules.push_back((Rule){QRegularExpression(pattern), keywordFormat});
+    }                                                              //keyword样式
+    rules.push_back((Rule){QRegularExpression("\\b[0-9]+\\b"), numberFormat}); //number样式
+    rules.push_back((Rule){QRegularExpression("[,;()\\{\\}\\[\\]\\~\\!\\@\\#\\$\\%\\^\\&\\-\\=\\+\\*\\?<>:]"), operatorFormat});
+    rules.push_back((Rule){QRegularExpression("\".*\""), quotationFormat});
+    rules.push_back((Rule){QRegularExpression("^#.*$"), precomplingInstructionFormat});  //预编译指令样式
+    rules.push_back((Rule){QRegularExpression("//.*$"), singleLineCommentFormat});  //单行注释样式
 }
 
 void Highlighter::highlightBlock(const QString &text)

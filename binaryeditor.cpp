@@ -40,6 +40,8 @@ void BinaryEditor::paintEvent(QPaintEvent* e)
     m_char = ft.horizontalAdvance("M");
     m_margin = m_char;
     m_height = ft.height();
+
+    qDebug() << "w, h = " << m_char << " " << m_height;
     side_width = m_margin + 8 * m_char;
     tot_width = side_width + 65 * m_char;
 
@@ -212,6 +214,23 @@ void BinaryEditor::wheelEvent(QWheelEvent *e)
     }
 }
 
+void BinaryEditor::mousePressEvent(QMouseEvent *e)
+{
+    if (e->button() == Qt::LeftButton)
+    {
+        int x = e->x(), y = e->y();
+        int y_offset = verticalScrollBar()->value();
+        int x_offset = horizontalScrollBar()->value();
+        int r = y_offset + y / m_height - 1;
+        int c = (x + x_offset - side_width) / (3 * m_char);
+        if (r >= y_offset && c >= 0 && c < 16 && r * 16 + c < textString.length()) {
+            //qDebug() << r << " " << c;
+            cursor_c = c;
+            cursor_r = r;
+            viewport()->update();
+        }
+    }
+}
 
 BinaryEditor::~BinaryEditor()
 {
